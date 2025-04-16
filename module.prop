@@ -1,0 +1,4 @@
+id=tee
+name=Add support to other variants
+author=Fede2782, SalvoGiangreco, @Ksawlii
+description=Replaces generic source blobs with target ones.
