@@ -1,9 +1,0 @@
-# SM-A536E (South America)
-on early-fs && property:ro.boot.em.model=SM-A536E
-    # TEEgris
-    mount none /vendor/tee_cis /vendor/tee bind
-
-# SM-A536B (Europe)
-on early-fs && property:ro.boot.em.model=SM-A536B
-    # TEEgris
-    mount none /vendor/tee_eur /vendor/tee bind
