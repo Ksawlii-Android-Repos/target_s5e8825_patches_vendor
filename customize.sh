@@ -7,17 +7,9 @@ else
   UNICA="0"
 fi
 
-TEE_DIR="$(pwd)/tee"
-
 if [ -z "$1" ] && [ -z "$2" ] && [ "$UNICA" != "1" ]; then
-  if [ ! -d "$TEE_DIR" ]; then
-    echo "Usage: $0 [model] [vendor_dir] [tee_dir]"
-    echo "Example: $0 A536B ../vendor /home/ksawlii/tee"
-    C_DIR="1"
-  else
-    echo "Usage: $0 [model] [vendor_dir]"
-    echo "Example: $0 A536B ../vendor"
-  fi
+  echo "Usage: $0 [model] [vendor_dir] [mods_dir]"
+  echo "Example: $0 A536B ../vendor /home/ksawlii/vendor_mods"
   exit 1
 fi
 
@@ -28,7 +20,7 @@ if [ "$UNICA" = "1" ]; then
   else
     D="$TARGET_CODENAME"
   fi
-  TEE_DIR="$SRC_DIR/target/$D/patches/tee/tee"
+  TEE_DIR="$SRC_DIR/target/$D/patches/vendor/tee"
   LATEST="$(cat $SRC_DIR/target/$D/patches/tee/.latest)"
 
   mv -f "$WORK_DIR/vendor/tee" "$WORK_DIR/vendor/tee_latest"
@@ -58,7 +50,7 @@ if [ "$UNICA" = "1" ]; then
   mapfile -t BLOBS < <(find "$TEE_DIR" -maxdepth 1 -type d -name "${MODEL}*" -printf '%f\n')
 
   for t in "${BLOBS[@]}"; do
-    cp -fa --preserve=all "$SRC_DIR/target/$D/patches/tee/tee/$t" "$WORK_DIR/vendor/"
+    cp -fa --preserve=all "$SRC_DIR/target/$D/patches/vendor/tee/$t" "$WORK_DIR/vendor/"
 
     echo "on early-fs && property:ro.boot.em.model=$MODEL && property:ro.boot.bootloader=$t" >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
     echo "mount none /vendor/$t /vendor/tee bind" >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
@@ -159,28 +151,29 @@ if [ "$UNICA" = "1" ]; then
       echo "(allow init_31_0 tee_file (dir (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
       echo "(allow priv_app_31_0 tee_file (dir (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
   fi
+
+  cp -fa --preserve=all "$SRC_DIR/target/$D/patches/vendor/libs/lib/libtinyalsa.so" "$WORK_DIR/vendor/lib/vndk/libtinyalsa.so"
+  cp -fa --preserve=all "$SRC_DIR/target/$D/patches/vendor/libs/lib64/libtinyalsa.so" "$WORK_DIR/vendor/lib64/vndk/libtinyalsa.so"
 fi
 
 # For MIO or some other kitchen
 if [ "$UNICA" = "0" ]; then
   MODEL="$1"
   VENDOR="$2"
-  if [ "$C_DIR" != "1" ]; then
-    TEE_DIR="$3"    
-  fi
-  LATEST="$(cat $TEE_DIR/../.latest)"
+  MODS_DIR="$3"    
+  LATEST="$(cat $MODS_DIR/.latest)"
 
   mv -f "$VENDOR/tee" "$VENDOR/tee_latest"
   mkdir -p "$VENDOR/tee"
 
   [ -f "$VENDOR/etc/init/tee_blobs.rc" ] && rm -f "$VENDOR/etc/init/tee_blobs.rc" 
   
-  mapfile -t BLOBS < <(find "$TEE_DIR" -maxdepth 1 -type d -name "${MODEL}*" -printf '%f\n')
+  mapfile -t BLOBS < <(find "$MODS_DIR" -maxdepth 1 -type d -name "${MODEL}*" -printf '%f\n')
  
   for t in "${BLOBS[@]}"; do
     [ -d "$VENDOR/tee_$t" ]
     echo "Copying $t"
-    cp -fa --preserve=all "$TEE_DIR/$t" "$VENDOR/tee_$t"
+    cp -fa --preserve=all "$MODS_DIR/tee/$t" "$VENDOR/tee_$t"
 
     echo "on early-fs && property:ro.boot.em.model=$MODEL && property:ro.boot.bootloader=$t" >> "$VENDOR/etc/init/tee_blobs.rc"
     echo "mount none /vendor/tee_$t /vendor/tee bind" >> "$VENDOR/etc/init/tee_blobs.rc"
@@ -193,4 +186,7 @@ if [ "$UNICA" = "0" ]; then
       echo "(allow init_31_0 tee_file (dir (mounton)))" >> "$VENDOR/etc/selinux/vendor_sepolicy.cil"
       echo "(allow priv_app_31_0 tee_file (dir (getattr)))" >> "$VENDOR/etc/selinux/vendor_sepolicy.cil"
   fi
+
+  cp -fa --preserve=all "$SRC_DIR/target/$D/patches/vendor/libs/lib/libtinyalsa.so" "$WORK_DIR/vendor/lib/vndk/libtinyalsa.so"
+  cp -fa --preserve=all "$SRC_DIR/target/$D/patches/vendor/libs/lib64/libtinyalsa.so" "$WORK_DIR/vendor/lib64/vndk/libtinyalsa.so"
 fi
