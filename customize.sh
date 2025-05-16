@@ -45,7 +45,7 @@ if [ "$UNICA" = "1" ]; then
 
   mapfile -t BLOBS < <(
     find "$TEE_DIR" -maxdepth 1 -type d -name "${MODEL}*" -printf '%f\n' |
-    grep -v "$TARGET_MODEL"
+    grep -v "$LATEST"
   )
 
   for t in "${BLOBS[@]}"; do
