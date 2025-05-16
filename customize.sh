@@ -23,12 +23,31 @@ if [ "$UNICA" = "1" ]; then
   TEE_DIR="$SRC_DIR/target/$D/patches/vendor/tee"
   LATEST="$(cat $FW_DIR/SM-A536E_ZTO/.extracted | cut -d'/' -f1 )"
 
+  # Tee stuff
   mv -f "$WORK_DIR/vendor/tee" "$WORK_DIR/vendor/tee_latest"
   sed -i "s./vendor/tee./vendor/tee_latest.g" "$WORK_DIR/configs/file_context-vendor"
   sed -i "s.vendor/tee.vendor/tee_latest.g" "$WORK_DIR/configs/fs_config-vendor"
   mkdir -p "$WORK_DIR/vendor/tee"
+  # Firmware stuff
+  mkdir -p "$WORK_DIR/vendor/firmware/eur"
+  mv -f "$WORK_DIR/vendor/firmware/AP_AUDIO_SLSI.bin" "$WORK_DIR/vendor/firmware/eur/AP_AUDIO_SLSI.bin"
+  mv -f "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin" "$WORK_DIR/vendor/firmware/eur/APDV_AUDIO_SLSI.bin"
+  mv -f "$WORK_DIR/vendor/firmware/calliope_sram.bin" "$WORK_DIR/vendor/firmware/eur/calliope_sram.bin"
+  mv -f "$WORK_DIR/vendor/firmware/mfc_fw.bin" "$WORK_DIR/vendor/firmware/eur/mfc_fw.bin"
+  mv -f "$WORK_DIR/vendor/firmware/os.checked.bin" "$WORK_DIR/vendor/firmware/sea/os.checked.bin"
+  mv -f "$WORK_DIR/vendor/firmware/NPU.bin" "$WORK_DIR/vendor/firmware/sea/NPU.bin"
+  mv -f "$WORK_DIR/vendor/firmware/vts.bin" "$WORK_DIR/vendor/firmware/sea/vts.bin"
+  touch "$WORK_DIR/vendor/firmware/AP_AUDIO_SLSI.bin"
+  touch "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin"
+  touch "$WORK_DIR/vendor/firmware/calliope_sram.bin"
+  touch "$WORK_DIR/vendor/firmware/mfc_fw.bin"
+  touch "$WORK_DIR/vendor/firmware/os.checked.bin"
+  touch "$WORK_DIR/vendor/firmware/NPU.bin"
+  touch "$WORK_DIR/vendor/firmware/vts.bin"
+  [ -d "$WORK_DIR/vendor/firmware/cis" ] && rm -rf "$WORK_DIR/vendor/firmware/cis"
+  cp -a --preserve=all "$SRC_DIR/target/$D/patches/vendor/firmware/cis" "$WORK_DIR/vendor/firmware/cis"
 
-   [ -f "$WORK_DIR/vendor/etc/init/tee_blobs.rc" ] && rm -f "$WORK_DIR/vendor/etc/init/tee_blobs.rc" 
+  [ -f "$WORK_DIR/vendor/etc/init/tee_blobs.rc" ] && rm -f "$WORK_DIR/vendor/etc/init/tee_blobs.rc" 
 
   if ! grep -q "tee_blobs" "$WORK_DIR/configs/file_context-vendor"; then
     {
@@ -59,8 +78,22 @@ if [ "$UNICA" = "1" ]; then
 
     VARIANT=$(echo "$t" | sed -E 's/^([A-Z0-9]{5}).*/\1/') 
 
-    echo "on early-fs && property:ro.boot.em.model=SM-$VARIANT && property:ro.boot.bootloader=$t" >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
-    echo "mount none /vendor/tee_$t /vendor/tee bind" >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
+    if [ "$VARIANT" = "A536B" ]; then
+      OPEN="eur"
+    elif [ "$VARIANT" = "A536E" ]; then
+      OPEN="cis"
+    fi
+
+    {
+      echo "on early-fs && property:ro.boot.em.model=SM-$VARIANT && property:ro.boot.bootloader=$t"
+      echo "mount none /vendor/tee_$t /vendor/tee bind"
+      echo "mount none /vendor/firmware/$OPEN/AIE.bin /vendor/firmware/AIE.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/os.checked.bin /vendor/firmware/os.checked.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/pablo_icpufw.bin /vendor/firmware/pablo_icpufw.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/vts.bin /vendor/firmware/vts.bin bind"
+    } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
 
     if ! grep -q "vendor/tee_$t" "$WORK_DIR/configs/file_context-vendor"; then
       {
@@ -169,11 +202,63 @@ if [ "$UNICA" = "1" ]; then
     fi
   done
 
-  echo "on early-fs && property:ro.boot.em.model=$FULL_MODEL && property:ro.boot.bootloader=$LATEST" >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
-  echo "mount none /vendor/tee_latest /vendor/tee bind" >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
-  
+  if ! grep -q "vendor/firmware/eur" "$WORK_DIR/configs/file_context-vendor"; then
+    {
+      echo "/vendor/firmware/eur u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/AP_AUDIO_SLSI\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/APDV_AUDIO_SLSI\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/calliope_sram\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/mfc_fw\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/NPU\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/os.checked\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/vts\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/AP_AUDIO_SLSI\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/APDV_AUDIO_SLSI\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/calliope_sram\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/mfc_fw\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/NPU\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/os.checked\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/vts\.bin u:object_r:vendor_fw_file:s0"
+    } >> "$WORK_DIR/configs/file_context-vendor"
+  fi
+
+  if ! grep -q "vendor/firmware/eur" "$WORK_DIR/configs/fs_config-vendor"; then
+    {
+      echo "vendor/firmware/eur 0 2000 755 capabilities=0x0"
+      echo "vendor/firmware/eur/AP_AUDIO_SLSI.bin.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/eur/APDV_AUDIO_SLSI.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/eur/calliope_sram.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/eur/mfc_fw.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/eur/NPU.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/eur/os.checked.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/eur/vts.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis 0 2000 755 capabilities=0x0"
+      echo "vendor/firmware/cis/AP_AUDIO_SLSI.bin.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis/APDV_AUDIO_SLSI.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis/calliope_sram.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis/mfc_fw.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis/NPU.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis/os.checked.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis/vts.bin 0 0 644 capabilities=0x0"
+    } >> "$WORK_DIR/configs/fs_config-vendor"
+  fi
+
+  {
+    echo "on early-fs && property:ro.boot.em.model=$FULL_MODEL && property:ro.boot.bootloader=$LATEST"
+    echo "mount none /vendor/tee_latest /vendor/tee bind"
+    echo "mount none /vendor/firmware/eur/AIE.bin /vendor/firmware/AIE.bin bind"
+    echo "mount none /vendor/firmware/eur/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
+    echo "mount none /vendor/firmware/eur/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
+    echo "mount none /vendor/firmware/eur/os.checked.bin /vendor/firmware/os.checked.bin bind"
+    echo "mount none /vendor/firmware/eur/pablo_icpufw.bin /vendor/firmware/pablo_icpufw.bin bind"
+    echo "mount none /vendor/firmware/eur/vts.bin /vendor/firmware/vts.bin bind"
+  } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
+
   if ! grep -q "tee_file (dir (mounton" "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"; then
-      echo "(allow init_31_0 tee_file (dir (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
-      echo "(allow priv_app_31_0 tee_file (dir (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+    echo "(allow init_31_0 tee_file (dir (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+    echo "(allow priv_app_31_0 tee_file (dir (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+    echo "(allow init_33_0 vendor_fw_file (file (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+    echo "(allow priv_app_33_0 vendor_fw_file (file (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
   fi
 fi
