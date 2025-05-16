@@ -176,7 +176,4 @@ if [ "$UNICA" = "1" ]; then
       echo "(allow init_31_0 tee_file (dir (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
       echo "(allow priv_app_31_0 tee_file (dir (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
   fi
-
-  cp -fa --preserve=all "$SRC_DIR/target/$D/patches/vendor/libs/lib/libtinyalsa.so" "$WORK_DIR/vendor/lib/vndk/libtinyalsa.so"
-  cp -fa --preserve=all "$SRC_DIR/target/$D/patches/vendor/libs/lib64/libtinyalsa.so" "$WORK_DIR/vendor/lib64/vndk/libtinyalsa.so"
 fi
