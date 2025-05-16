@@ -21,7 +21,7 @@ if [ "$UNICA" = "1" ]; then
     D="$TARGET_CODENAME"
   fi
   TEE_DIR="$SRC_DIR/target/$D/patches/vendor/tee"
-  LATEST="$(cat $FW_DIR/SM-A536E_ZTO/.extracted | cut -d'/' -f1 )"
+  LATEST="$(cat $FW_DIR/SM-A536B_EUX/.extracted | cut -d'/' -f1 )"
   TARGET_MODEL=$(echo "$TARGET_FIRMWARE" | sed -E 's/^SM-([A-Z0-9]+).*/\1/')
   MODEL=$(echo "$TARGET_FIRMWARE" | sed -E 's/^SM-([A-Z0-9]+)[A-Z].*/\1/')
   FULL_MODEL=$(echo -n "$TARGET_FIRMWARE" | cut -d "/" -f 1)
