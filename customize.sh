@@ -22,31 +22,20 @@ if [ "$UNICA" = "1" ]; then
   fi
   TEE_DIR="$SRC_DIR/target/$D/patches/vendor/tee"
   LATEST="$(cat $FW_DIR/SM-A536E_ZTO/.extracted | cut -d'/' -f1 )"
+  TARGET_MODEL=$(echo "$TARGET_FIRMWARE" | sed -E 's/^SM-([A-Z0-9]+).*/\1/')
+  MODEL=$(echo "$TARGET_FIRMWARE" | sed -E 's/^SM-([A-Z0-9]+)[A-Z].*/\1/')
+  FULL_MODEL=$(echo -n "$TARGET_FIRMWARE" | cut -d "/" -f 1)
+
+  mapfile -t BLOBS < <(
+    find "$TEE_DIR" -maxdepth 1 -type d -name "${MODEL}*" -printf '%f\n' |
+    grep -v "$LATEST"
+  )
 
   # Tee stuff
   mv -f "$WORK_DIR/vendor/tee" "$WORK_DIR/vendor/tee_latest"
   sed -i "s./vendor/tee./vendor/tee_latest.g" "$WORK_DIR/configs/file_context-vendor"
   sed -i "s.vendor/tee.vendor/tee_latest.g" "$WORK_DIR/configs/fs_config-vendor"
   mkdir -p "$WORK_DIR/vendor/tee"
-  # Firmware stuff
-  mkdir -p "$WORK_DIR/vendor/firmware/eur"
-  mv -f "$WORK_DIR/vendor/firmware/AP_AUDIO_SLSI.bin" "$WORK_DIR/vendor/firmware/eur/AP_AUDIO_SLSI.bin"
-  mv -f "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin" "$WORK_DIR/vendor/firmware/eur/APDV_AUDIO_SLSI.bin"
-  mv -f "$WORK_DIR/vendor/firmware/calliope_sram.bin" "$WORK_DIR/vendor/firmware/eur/calliope_sram.bin"
-  mv -f "$WORK_DIR/vendor/firmware/mfc_fw.bin" "$WORK_DIR/vendor/firmware/eur/mfc_fw.bin"
-  mv -f "$WORK_DIR/vendor/firmware/os.checked.bin" "$WORK_DIR/vendor/firmware/sea/os.checked.bin"
-  mv -f "$WORK_DIR/vendor/firmware/NPU.bin" "$WORK_DIR/vendor/firmware/sea/NPU.bin"
-  mv -f "$WORK_DIR/vendor/firmware/vts.bin" "$WORK_DIR/vendor/firmware/sea/vts.bin"
-  touch "$WORK_DIR/vendor/firmware/AP_AUDIO_SLSI.bin"
-  touch "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin"
-  touch "$WORK_DIR/vendor/firmware/calliope_sram.bin"
-  touch "$WORK_DIR/vendor/firmware/mfc_fw.bin"
-  touch "$WORK_DIR/vendor/firmware/os.checked.bin"
-  touch "$WORK_DIR/vendor/firmware/NPU.bin"
-  touch "$WORK_DIR/vendor/firmware/vts.bin"
-  [ -d "$WORK_DIR/vendor/firmware/cis" ] && rm -rf "$WORK_DIR/vendor/firmware/cis"
-  cp -a --preserve=all "$SRC_DIR/target/$D/patches/vendor/firmware/cis" "$WORK_DIR/vendor/firmware/cis"
-
   [ -f "$WORK_DIR/vendor/etc/init/tee_blobs.rc" ] && rm -f "$WORK_DIR/vendor/etc/init/tee_blobs.rc" 
 
   if ! grep -q "tee_blobs" "$WORK_DIR/configs/file_context-vendor"; then
@@ -62,15 +51,6 @@ if [ "$UNICA" = "1" ]; then
       echo "vendor/tee 0 2000 755 capabilities=0x0"
     } >> "$WORK_DIR/configs/fs_config-vendor"
   fi
-
-  TARGET_MODEL=$(echo "$TARGET_FIRMWARE" | sed -E 's/^SM-([A-Z0-9]+).*/\1/')
-  MODEL=$(echo "$TARGET_FIRMWARE" | sed -E 's/^SM-([A-Z0-9]+)[A-Z].*/\1/')
-  FULL_MODEL=$(echo -n "$TARGET_FIRMWARE" | cut -d "/" -f 1)
-
-  mapfile -t BLOBS < <(
-    find "$TEE_DIR" -maxdepth 1 -type d -name "${MODEL}*" -printf '%f\n' |
-    grep -v "$LATEST"
-  )
 
   for t in "${BLOBS[@]}"; do
     [ -d "$WORK_DIR/vendor/tee_$t" ] && rm -rf "$WORK_DIR/vendor/tee_$t"
@@ -202,6 +182,25 @@ if [ "$UNICA" = "1" ]; then
     fi
   done
 
+  # Firmware stuff
+  mkdir -p "$WORK_DIR/vendor/firmware/eur"
+  mv -f "$WORK_DIR/vendor/firmware/AP_AUDIO_SLSI.bin" "$WORK_DIR/vendor/firmware/eur/AP_AUDIO_SLSI.bin"
+  mv -f "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin" "$WORK_DIR/vendor/firmware/eur/APDV_AUDIO_SLSI.bin"
+  mv -f "$WORK_DIR/vendor/firmware/calliope_sram.bin" "$WORK_DIR/vendor/firmware/eur/calliope_sram.bin"
+  mv -f "$WORK_DIR/vendor/firmware/mfc_fw.bin" "$WORK_DIR/vendor/firmware/eur/mfc_fw.bin"
+  mv -f "$WORK_DIR/vendor/firmware/os.checked.bin" "$WORK_DIR/vendor/firmware/sea/os.checked.bin"
+  mv -f "$WORK_DIR/vendor/firmware/NPU.bin" "$WORK_DIR/vendor/firmware/sea/NPU.bin"
+  mv -f "$WORK_DIR/vendor/firmware/vts.bin" "$WORK_DIR/vendor/firmware/sea/vts.bin"
+  touch "$WORK_DIR/vendor/firmware/AP_AUDIO_SLSI.bin"
+  touch "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin"
+  touch "$WORK_DIR/vendor/firmware/calliope_sram.bin"
+  touch "$WORK_DIR/vendor/firmware/mfc_fw.bin"
+  touch "$WORK_DIR/vendor/firmware/os.checked.bin"
+  touch "$WORK_DIR/vendor/firmware/NPU.bin"
+  touch "$WORK_DIR/vendor/firmware/vts.bin"
+  [ -d "$WORK_DIR/vendor/firmware/cis" ] && rm -rf "$WORK_DIR/vendor/firmware/cis"
+  cp -a --preserve=all "$SRC_DIR/target/$D/patches/vendor/firmware/cis" "$WORK_DIR/vendor/firmware/cis"
+
   if ! grep -q "vendor/firmware/eur" "$WORK_DIR/configs/file_context-vendor"; then
     {
       echo "/vendor/firmware/eur u:object_r:vendor_fw_file:s0"
@@ -244,6 +243,7 @@ if [ "$UNICA" = "1" ]; then
     } >> "$WORK_DIR/configs/fs_config-vendor"
   fi
 
+  # Tee/Firmware
   {
     echo "on early-fs && property:ro.boot.em.model=$FULL_MODEL && property:ro.boot.bootloader=$LATEST"
     echo "mount none /vendor/tee_latest /vendor/tee bind"
@@ -255,6 +255,7 @@ if [ "$UNICA" = "1" ]; then
     echo "mount none /vendor/firmware/eur/vts.bin /vendor/firmware/vts.bin bind"
   } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
 
+  # Sepolicy
   if ! grep -q "tee_file (dir (mounton" "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"; then
     echo "(allow init_31_0 tee_file (dir (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
     echo "(allow priv_app_31_0 tee_file (dir (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
