@@ -26,6 +26,11 @@ if [ "$UNICA" = "1" ]; then
   MODEL=$(echo "$TARGET_FIRMWARE" | sed -E 's/^SM-([A-Z0-9]+)[A-Z].*/\1/')
   FULL_MODEL=$(echo -n "$TARGET_FIRMWARE" | cut -d "/" -f 1)
 
+  if [ "$FULL_MODEL" != "SM-A536B" ]; then
+    echo "ERROR: Please use SM-A536B vendor to continue"
+    exit 1
+  fi
+
   mapfile -t BLOBS < <(
     find "$TEE_DIR" -maxdepth 1 -type d -name "${MODEL}*" -printf '%f\n' |
     grep -v "$LATEST"
