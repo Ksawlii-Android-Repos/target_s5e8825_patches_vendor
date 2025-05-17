@@ -37,6 +37,7 @@ if [ "$UNICA" = "1" ]; then
   )
 
   # Tee stuff
+  [ -d "$WORK_DIR/vendor/tee_latest" ] && rm -rf "$WORK_DIR/vendor/tee_latest"
   mv -f "$WORK_DIR/vendor/tee" "$WORK_DIR/vendor/tee_latest"
   sed -i "s./vendor/tee./vendor/tee_latest.g" "$WORK_DIR/configs/file_context-vendor"
   sed -i "s.vendor/tee.vendor/tee_latest.g" "$WORK_DIR/configs/fs_config-vendor"
@@ -72,11 +73,12 @@ if [ "$UNICA" = "1" ]; then
     {
       echo "on early-fs && property:ro.boot.em.model=SM-$VARIANT && property:ro.boot.bootloader=$t"
       echo "mount none /vendor/tee_$t /vendor/tee bind"
-      echo "mount none /vendor/firmware/$OPEN/AIE.bin /vendor/firmware/AIE.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/AP_AUDIO_SLSI.bin /vendor/firmware/AP_AUDIO_SLSI.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/APDV_AUDIO_SLSI.bin /vendor/firmware/APDV_AUDIO_SLSI.bin bind"
       echo "mount none /vendor/firmware/$OPEN/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
       echo "mount none /vendor/firmware/$OPEN/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
+      echo "mount none /vendor/firmware/$OPEN/NPU.bin /vendor/firmware/NPU.bin bind"
       echo "mount none /vendor/firmware/$OPEN/os.checked.bin /vendor/firmware/os.checked.bin bind"
-      echo "mount none /vendor/firmware/$OPEN/pablo_icpufw.bin /vendor/firmware/pablo_icpufw.bin bind"
       echo "mount none /vendor/firmware/$OPEN/vts.bin /vendor/firmware/vts.bin bind"
     } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
 
@@ -193,9 +195,9 @@ if [ "$UNICA" = "1" ]; then
   mv -f "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin" "$WORK_DIR/vendor/firmware/eur/APDV_AUDIO_SLSI.bin"
   mv -f "$WORK_DIR/vendor/firmware/calliope_sram.bin" "$WORK_DIR/vendor/firmware/eur/calliope_sram.bin"
   mv -f "$WORK_DIR/vendor/firmware/mfc_fw.bin" "$WORK_DIR/vendor/firmware/eur/mfc_fw.bin"
-  mv -f "$WORK_DIR/vendor/firmware/os.checked.bin" "$WORK_DIR/vendor/firmware/sea/os.checked.bin"
-  mv -f "$WORK_DIR/vendor/firmware/NPU.bin" "$WORK_DIR/vendor/firmware/sea/NPU.bin"
-  mv -f "$WORK_DIR/vendor/firmware/vts.bin" "$WORK_DIR/vendor/firmware/sea/vts.bin"
+  mv -f "$WORK_DIR/vendor/firmware/os.checked.bin" "$WORK_DIR/vendor/firmware/eur/os.checked.bin"
+  mv -f "$WORK_DIR/vendor/firmware/NPU.bin" "$WORK_DIR/vendor/firmware/eur/NPU.bin"
+  mv -f "$WORK_DIR/vendor/firmware/vts.bin" "$WORK_DIR/vendor/firmware/eur/vts.bin"
   touch "$WORK_DIR/vendor/firmware/AP_AUDIO_SLSI.bin"
   touch "$WORK_DIR/vendor/firmware/APDV_AUDIO_SLSI.bin"
   touch "$WORK_DIR/vendor/firmware/calliope_sram.bin"
@@ -203,7 +205,7 @@ if [ "$UNICA" = "1" ]; then
   touch "$WORK_DIR/vendor/firmware/os.checked.bin"
   touch "$WORK_DIR/vendor/firmware/NPU.bin"
   touch "$WORK_DIR/vendor/firmware/vts.bin"
-  [ -d "$WORK_DIR/vendor/firmware/cis" ] && rm -rf "$WORK_DIR/vendor/firmware/cis"
+  [ -d "$WORK_DIR/vendor/firmware/cis" ] && rm -rf "$WORK_DIR/vendor/firmware/cis" && mkdir -p "$WORK_DIR/vendor/firmware/cis"
   cp -a --preserve=all "$SRC_DIR/target/$D/patches/vendor/firmware/cis" "$WORK_DIR/vendor/firmware/cis"
 
   if ! grep -q "vendor/firmware/eur" "$WORK_DIR/configs/file_context-vendor"; then
@@ -230,7 +232,7 @@ if [ "$UNICA" = "1" ]; then
   if ! grep -q "vendor/firmware/eur" "$WORK_DIR/configs/fs_config-vendor"; then
     {
       echo "vendor/firmware/eur 0 2000 755 capabilities=0x0"
-      echo "vendor/firmware/eur/AP_AUDIO_SLSI.bin.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/eur/AP_AUDIO_SLSI.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/eur/APDV_AUDIO_SLSI.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/eur/calliope_sram.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/eur/mfc_fw.bin 0 0 644 capabilities=0x0"
@@ -238,7 +240,7 @@ if [ "$UNICA" = "1" ]; then
       echo "vendor/firmware/eur/os.checked.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/eur/vts.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/cis 0 2000 755 capabilities=0x0"
-      echo "vendor/firmware/cis/AP_AUDIO_SLSI.bin.bin 0 0 644 capabilities=0x0"
+      echo "vendor/firmware/cis/AP_AUDIO_SLSI.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/cis/APDV_AUDIO_SLSI.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/cis/calliope_sram.bin 0 0 644 capabilities=0x0"
       echo "vendor/firmware/cis/mfc_fw.bin 0 0 644 capabilities=0x0"
@@ -252,11 +254,12 @@ if [ "$UNICA" = "1" ]; then
   {
     echo "on early-fs && property:ro.boot.em.model=$FULL_MODEL && property:ro.boot.bootloader=$LATEST"
     echo "mount none /vendor/tee_latest /vendor/tee bind"
-    echo "mount none /vendor/firmware/eur/AIE.bin /vendor/firmware/AIE.bin bind"
+    echo "mount none /vendor/firmware/eur/AP_AUDIO_SLSI.bin /vendor/firmware/AP_AUDIO_SLSI.bin bind"
+    echo "mount none /vendor/firmware/eur/APDV_AUDIO_SLSI.bin /vendor/firmware/APDV_AUDIO_SLSI.bin bind"
     echo "mount none /vendor/firmware/eur/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
     echo "mount none /vendor/firmware/eur/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
+    echo "mount none /vendor/firmware/eur/NPU.bin /vendor/firmware/NPU.bin bind"
     echo "mount none /vendor/firmware/eur/os.checked.bin /vendor/firmware/os.checked.bin bind"
-    echo "mount none /vendor/firmware/eur/pablo_icpufw.bin /vendor/firmware/pablo_icpufw.bin bind"
     echo "mount none /vendor/firmware/eur/vts.bin /vendor/firmware/vts.bin bind"
   } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
 
