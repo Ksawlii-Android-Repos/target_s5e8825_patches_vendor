@@ -64,22 +64,9 @@ if [ "$UNICA" = "1" ]; then
 
     VARIANT=$(echo "$t" | sed -E 's/^([A-Z0-9]{5}).*/\1/') 
 
-    if [ "$VARIANT" = "A536B" ]; then
-      OPEN="eur"
-    elif [ "$VARIANT" = "A536E" ]; then
-      OPEN="cis"
-    fi
-
     {
       echo "on early-fs && property:ro.boot.em.model=SM-$VARIANT && property:ro.boot.bootloader=$t"
       echo "mount none /vendor/tee_$t /vendor/tee bind"
-      echo "mount none /vendor/firmware/$OPEN/AP_AUDIO_SLSI.bin /vendor/firmware/AP_AUDIO_SLSI.bin bind"
-      echo "mount none /vendor/firmware/$OPEN/APDV_AUDIO_SLSI.bin /vendor/firmware/APDV_AUDIO_SLSI.bin bind"
-      echo "mount none /vendor/firmware/$OPEN/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
-      echo "mount none /vendor/firmware/$OPEN/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
-      echo "mount none /vendor/firmware/$OPEN/NPU.bin /vendor/firmware/NPU.bin bind"
-      echo "mount none /vendor/firmware/$OPEN/os.checked.bin /vendor/firmware/os.checked.bin bind"
-      echo "mount none /vendor/firmware/$OPEN/vts.bin /vendor/firmware/vts.bin bind"
     } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
 
     if ! grep -q "vendor/tee_$t" "$WORK_DIR/configs/file_context-vendor"; then
@@ -250,10 +237,25 @@ if [ "$UNICA" = "1" ]; then
     } >> "$WORK_DIR/configs/fs_config-vendor"
   fi
 
-  # Tee/Firmware
+  # Tee
   {
     echo "on early-fs && property:ro.boot.em.model=$FULL_MODEL && property:ro.boot.bootloader=$LATEST"
     echo "mount none /vendor/tee_latest /vendor/tee bind"
+  } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
+
+  # Firmware
+  {
+    echo "on early-fs && property:ro.boot.em.model=SM-A536B"
+    echo "mount none /vendor/firmware/eur/AP_AUDIO_SLSI.bin /vendor/firmware/AP_AUDIO_SLSI.bin bind"
+    echo "mount none /vendor/firmware/eur/APDV_AUDIO_SLSI.bin /vendor/firmware/APDV_AUDIO_SLSI.bin bind"
+    echo "mount none /vendor/firmware/eur/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
+    echo "mount none /vendor/firmware/eur/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
+    echo "mount none /vendor/firmware/eur/NPU.bin /vendor/firmware/NPU.bin bind"
+    echo "mount none /vendor/firmware/eur/os.checked.bin /vendor/firmware/os.checked.bin bind"
+    echo "mount none /vendor/firmware/eur/vts.bin /vendor/firmware/vts.bin bind"
+  } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
+  {
+    echo "on early-fs && property:ro.boot.em.model=SM-A536E"
     echo "mount none /vendor/firmware/eur/AP_AUDIO_SLSI.bin /vendor/firmware/AP_AUDIO_SLSI.bin bind"
     echo "mount none /vendor/firmware/eur/APDV_AUDIO_SLSI.bin /vendor/firmware/APDV_AUDIO_SLSI.bin bind"
     echo "mount none /vendor/firmware/eur/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
