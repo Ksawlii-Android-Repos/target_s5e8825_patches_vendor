@@ -256,13 +256,13 @@ if [ "$UNICA" = "1" ]; then
   } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
   {
     echo "on early-fs && property:ro.boot.em.model=SM-A536E"
-    echo "mount none /vendor/firmware/eur/AP_AUDIO_SLSI.bin /vendor/firmware/AP_AUDIO_SLSI.bin bind"
-    echo "mount none /vendor/firmware/eur/APDV_AUDIO_SLSI.bin /vendor/firmware/APDV_AUDIO_SLSI.bin bind"
-    echo "mount none /vendor/firmware/eur/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
-    echo "mount none /vendor/firmware/eur/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
-    echo "mount none /vendor/firmware/eur/NPU.bin /vendor/firmware/NPU.bin bind"
-    echo "mount none /vendor/firmware/eur/os.checked.bin /vendor/firmware/os.checked.bin bind"
-    echo "mount none /vendor/firmware/eur/vts.bin /vendor/firmware/vts.bin bind"
+    echo "mount none /vendor/firmware/cis/AP_AUDIO_SLSI.bin /vendor/firmware/AP_AUDIO_SLSI.bin bind"
+    echo "mount none /vendor/firmware/cis/APDV_AUDIO_SLSI.bin /vendor/firmware/APDV_AUDIO_SLSI.bin bind"
+    echo "mount none /vendor/firmware/cis/calliope_sram.bin /vendor/firmware/calliope_sram.bin bind"
+    echo "mount none /vendor/firmware/cis/mfc_fw.bin /vendor/firmware/mfc_fw.bin bind"
+    echo "mount none /vendor/firmware/cis/NPU.bin /vendor/firmware/NPU.bin bind"
+    echo "mount none /vendor/firmware/cis/os.checked.bin /vendor/firmware/os.checked.bin bind"
+    echo "mount none /vendor/firmware/cis/vts.bin /vendor/firmware/vts.bin bind"
   } >> "$WORK_DIR/vendor/etc/init/tee_blobs.rc"
 
   # Sepolicy
