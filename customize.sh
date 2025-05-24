@@ -202,7 +202,7 @@ if [ "$UNICA" = "1" ]; then
       echo "/vendor/firmware/eur/APDV_AUDIO_SLSI\.bin u:object_r:vendor_fw_file:s0"
       echo "/vendor/firmware/eur/calliope_sram\.bin u:object_r:vendor_fw_file:s0"
       echo "/vendor/firmware/eur/mfc_fw\.bin u:object_r:vendor_fw_file:s0"
-      echo "/vendor/firmware/eur/NPU\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/eur/NPU\.bin u:object_r:vendor_npu_firmware_file:s0"
       echo "/vendor/firmware/eur/os.checked\.bin u:object_r:vendor_fw_file:s0"
       echo "/vendor/firmware/eur/vts\.bin u:object_r:vendor_fw_file:s0"
       echo "/vendor/firmware/cis u:object_r:vendor_fw_file:s0"
@@ -210,7 +210,7 @@ if [ "$UNICA" = "1" ]; then
       echo "/vendor/firmware/cis/APDV_AUDIO_SLSI\.bin u:object_r:vendor_fw_file:s0"
       echo "/vendor/firmware/cis/calliope_sram\.bin u:object_r:vendor_fw_file:s0"
       echo "/vendor/firmware/cis/mfc_fw\.bin u:object_r:vendor_fw_file:s0"
-      echo "/vendor/firmware/cis/NPU\.bin u:object_r:vendor_fw_file:s0"
+      echo "/vendor/firmware/cis/NPU\.bin u:object_r:vendor_npu_firmware_file:s0"
       echo "/vendor/firmware/cis/os.checked\.bin u:object_r:vendor_fw_file:s0"
       echo "/vendor/firmware/cis/vts\.bin u:object_r:vendor_fw_file:s0"
     } >> "$WORK_DIR/configs/file_context-vendor"
@@ -271,5 +271,7 @@ if [ "$UNICA" = "1" ]; then
     echo "(allow priv_app_31_0 tee_file (dir (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
     echo "(allow init_31_0 vendor_fw_file (file (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
     echo "(allow priv_app_31_0 vendor_fw_file (file (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+    echo "(allow init_31_0 vendor_npu_firmware_file (file (mounton)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+    echo "(allow priv_app_31_0 vendor_npu_firmware_file (file (getattr)))" >> "$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
   fi
 fi
